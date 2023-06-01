@@ -1,20 +1,23 @@
 const taskContainer = document.querySelector(".task__container");
 let globalStore = [];//array of objects
-console.log(taskContainer);
+// console.log(taskContainer);
 const generateNewCard = (taskData) => `
   <div class="col-sm-12 col-md-6 col-lg-4">
-  <div class="card mb-4">
-  <div class="card-header d-flex justify-content-end gap-2">
-   <button type="button" class="btn btn-outline-success"><i class="fas fa-pencil-alt"></i></button>
-  <button type="button" class="btn btn-outline-danger" id=${taskData.id} onclick="deleteCard.apply(this,arguments)"><i class="fas fa-trash-alt" id=${taskData.id} onclick="deleteCard.apply(this,arguments)"></i></button>
-  </div>
-  <div class="card-body">
-  <img class="card-img-top" src=${taskData.imageUrl} alt="...">
-   <h5 class="card-title mt-3 fw-bolder text-primary">${taskData.taskTitle}</h5>
-   <p class="card-text">${taskData.taskDescription}</p>
-   <a href="#" class="btn btn-primary">${taskData.taskType}</a>
-  </div>
-  </div>
+    <div class="card mb-4">
+      <div class="card-header d-flex justify-content-end gap-2">
+        <button type="button" class="btn btn-outline-success" id=${taskData.id} onclick="editCard.apply(this,arguments)"><i class="fas fa-pencil-alt"  id=${taskData.id} onclick="editCard.apply(this,arguments)"></i></button>
+        <button type="button" class="btn btn-outline-danger" id=${taskData.id} onclick="deleteCard.apply(this,arguments)"><i class="fas fa-trash-alt" id=${taskData.id} onclick="deleteCard.apply(this,arguments)"></i></button>
+      </div>
+      <div class="card-body">
+        <img class="card-img-top" src=${taskData.imageUrl} alt="...">
+        <h5 class="card-title mt-3 fw-bolder text-primary">${taskData.taskTitle}</h5>
+        <p class="card-text">${taskData.taskDescription}</p>
+        <a href="#" class="btn btn-primary">${taskData.taskType}</a>
+      </div>
+      <div class="card-footer d-flex justify-content-end text-body-secondary">
+        <button type="button" class="btn btn-outline-primary">Open Task</i></button>
+      </div>
+    </div>
   </div>
   `;
 
@@ -46,6 +49,7 @@ const deleteCard = (event) => {
   event = window.event;
   const targetID = event.target.id;
   const tagname = event.target.tagName;
+  // console.log(tagname);
 
   globalStore = globalStore.filter((cardObject) => cardObject.id !== targetID);
   localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
@@ -75,6 +79,36 @@ localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
 
 };
 
+
+const editCard = (event) => {
+  event = window.event;
+  const targetID = event.target.id;
+  const tagname = event.target.tagName;
+
+  // console.log(tagname);
+  let parentEle;
+  if(tagname === "BUTTON") {
+    parentEle = event.target.parentNode.parentNode;
+  } else {
+    parentEle = event.target.parentNode.parentNode.parentNode;
+  }
+
+  let taskTitle = parentEle.childNodes[3].childNodes[3];
+  let taskDescription = parentEle.childNodes[3].childNodes[5];
+  let taskType = parentEle.childNodes[3].childNodes[7];
+  let submitBtn= parentEle.childNodes[5].childNodes[1];
+
+  // console.log(taskTitle);
+  // console.log(taskDescription);
+  // console.log(taskType);
+
+  taskTitle.setAttribute("contenteditable", "true");
+  taskDescription.setAttribute("contenteditable", "true");
+  taskType.setAttribute("contenteditable", "true");
+  submitBtn.innerHTML = "Save Changes";
+
+}
+
 //Issues
 
 // Page refreshes causes the data to get deleted
@@ -83,3 +117,6 @@ localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
 //Interface -> Interface means middle man
 
 //Features - Delete , edit , open the card
+
+// console.log(window.event);
+
