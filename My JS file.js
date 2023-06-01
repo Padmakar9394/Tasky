@@ -15,29 +15,33 @@ const generateNewCard = (taskData) => `
         <a href="#" class="btn btn-primary">${taskData.taskType}</a>
       </div>
       <div class="card-footer d-flex justify-content-end text-body-secondary">
-        <button type="button" class="btn btn-outline-primary">Open Task</i></button>
+        <button type="button" id=${taskData.id} class="btn btn-outline-primary">Open Task</i></button>
       </div>
     </div>
   </div>
   `;
 
 
+const updateLocalStorage = () => {
+  localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
+}
+
 const loadInitialCardData = () => {
   //localstorage to get tasky card data
-const getCardData = localStorage.getItem("tasky");
+  const getCardData = localStorage.getItem("tasky");
 
 
-  //covert to normal object
-const {cards} = JSON.parse(getCardData);
+    //covert to normal object
+  const {cards} = JSON.parse(getCardData);
 
 
-  //loop over those array of task obejct to create HTML card , inject it to DOM
-cards.map((cardObject) => {
-  taskContainer.insertAdjacentHTML("beforeend", generateNewCard(cardObject));
+    //loop over those array of task obejct to create HTML card , inject it to DOM
+  cards.map((cardObject) => {
+    taskContainer.insertAdjacentHTML("beforeend", generateNewCard(cardObject));
 
-  //update our globalStore
-  globalStore.push(cardObject);
-}
+    //update our globalStore
+    globalStore.push(cardObject);
+  } 
 
 )
 
@@ -52,7 +56,8 @@ const deleteCard = (event) => {
   // console.log(tagname);
 
   globalStore = globalStore.filter((cardObject) => cardObject.id !== targetID);
-  localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
+  // localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
+  updateLocalStorage();
 
   if(tagname === "BUTTON") {
     return taskContainer.removeChild(event.target.parentNode.parentNode.parentNode);
@@ -75,7 +80,8 @@ const saveChanges = () => {
 taskContainer.insertAdjacentHTML("beforeend", generateNewCard(taskData));
 
 globalStore.push(taskData);
-localStorage.setItem("tasky",JSON.stringify({cards:globalStore}));
+// localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
+updateLocalStorage();
 
 };
 
@@ -105,8 +111,55 @@ const editCard = (event) => {
   taskTitle.setAttribute("contenteditable", "true");
   taskDescription.setAttribute("contenteditable", "true");
   taskType.setAttribute("contenteditable", "true");
+  submitBtn.setAttribute("onclick", "saveEditChanges.apply(this, arguments)");
   submitBtn.innerHTML = "Save Changes";
 
+}
+
+const saveEditChanges = (event) => {
+  event = window.event;
+  const targetID = event.target.id;
+  const tagname = event.target.tagName;
+
+  // console.log(tagname);
+  let parentEle;
+  if(tagname === "BUTTON") {
+    parentEle = event.target.parentNode.parentNode;
+  } else {
+    parentEle = event.target.parentNode.parentNode.parentNode;
+  }
+
+  let taskTitle = parentEle.childNodes[3].childNodes[3];
+  let taskDescription = parentEle.childNodes[3].childNodes[5];
+  let taskType = parentEle.childNodes[3].childNodes[7];
+  let submitBtn= parentEle.childNodes[5].childNodes[1];
+
+  const updatedData = {
+    title: taskTitle.innerHTML,
+    type: taskType.innerHTML,
+    description: taskDescription.innerHTML,
+  }
+
+  globalStore = globalStore.map((task) => {
+    if(task.id === targetID) {
+      return {
+        id: task.id,
+        imageUrl: task.imageUrl,
+        taskTitle: updatedData.title,
+        taskType: updatedData.type,
+        taskDescription: updatedData.description,
+      }
+    }
+    return task;
+  })
+  // console.log(globalStore);
+  // localStorage.setItem("tasky",JSON.stringify({cards: globalStore}));
+  updateLocalStorage();
+  taskTitle.setAttribute("contenteditable", "false");
+  taskDescription.setAttribute("contenteditable", "false");
+  taskType.setAttribute("contenteditable", "false");
+  submitBtn.removeAttribute("onclick");
+  submitBtn.innerHTML = "Open Task";
 }
 
 //Issues
